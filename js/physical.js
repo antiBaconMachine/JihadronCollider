@@ -217,6 +217,7 @@ db.physical = {
 						run();
 				};
 				this.start = function() {
+						db.log(db.LogLevel.INFO, "GRID TESTING");
 						
 						if (!interval) {
 
