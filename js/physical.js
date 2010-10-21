@@ -118,7 +118,7 @@ db.physical = {
 
 						if(e.nextOffset.left < limit.left) {
 								e.nextOffset.left = limit.left + fudge;
-						}else if((e.nextOffset.Left) > limit.right) {
+						}else if((e.nextOffset.left) > limit.right) {
 								e.nextOffset.left = limit.right;
 						} else {
 								hitX = false;
@@ -206,7 +206,6 @@ db.physical = {
 						run();
 				};
 				this.start = function() {
-						
 						if (!interval) {
 
 								if (db.profile) {
