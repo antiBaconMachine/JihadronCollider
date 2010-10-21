@@ -14,7 +14,7 @@ db.physical = {
 						minSpeed : 0.2,
 						maxSpeed : 100,
 						glideCancelTimeout : 100,
-						randomMass : true
+						randomMass : false
 				}
 				params = jQuery.extend({},defaults,params);
 
