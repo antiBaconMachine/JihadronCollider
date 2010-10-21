@@ -1,4 +1,3 @@
-//JIHADRON COLLIDER BABY
 db.physical = {
 		Collider        :    function(container, params) {
 				container = jQuery(container);
