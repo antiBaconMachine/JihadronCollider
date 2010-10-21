@@ -1,4 +1,3 @@
-//HI Jihadron
 db.physical = {
 		Collider        :    function(container, params) {
 				container = jQuery(container);
@@ -57,7 +56,7 @@ db.physical = {
 												}
 										}
 								}
-
+								e1.updatePosition();
 						}
 						runTimes.push(new Date().getTime()-startTime.getTime());
 						if (!isVolatile) {
@@ -92,8 +91,8 @@ db.physical = {
 
 				var move = function(e) {
 						var proj = e.projectile;
-						var pos = e.offset;
 						e.saveOffset();
+						var pos = e.nextOffset;
 
 						var chooseInverse = function(s,max){
 								return Math.max(s,max*-1)
@@ -106,7 +105,7 @@ db.physical = {
 
 						//db.log(db.LogLevel.DEBUG, "position of %o is %o",e,coords);
 
-						e.$element.offset(pos);
+						//e.$element.offset(pos);
 				}
 
 				//essentially a run on from move
@@ -114,27 +113,21 @@ db.physical = {
 
 						var hitX = true;
 						var hitY = true;
-						var switchX = false;
-						var switchY = false;
 
 						var fudge = 7;
 
-						if(e.element.offsetLeft < limit.left) {
-								e.offset.left = limit.left + fudge;
-								//if (e.projectile.velocity.x < 0) switchX = true;
-						}else if((e.element.offsetLeft) > limit.right) {
-								e.offset.left = limit.right;
-								//if (e.projectile.velocity.x > 0) switchX = true;
+						if(e.nextOffset.left < limit.left) {
+								e.nextOffset.left = limit.left + fudge;
+						}else if((e.nextOffset.Left) > limit.right) {
+								e.nextOffset.left = limit.right;
 						} else {
 								hitX = false;
 						}
 
-						if (e.element.offsetTop < limit.top) {
-								e.offset.top = limit.top + fudge;
-								//if (e.projectile.velocity.y < 0) switchY = true;
-						} else if ((e.element.offsetTop ) > limit.bottom) {
-								e.offset.top = limit.bottom;
-								//if (e.projectile.velocity.y > 0) switchY = true;
+						if (e.nextOffset.top < limit.top) {
+								e.nextOffset.top = limit.top + fudge;
+						} else if ((e.nextOffset.top ) > limit.bottom) {
+								e.nextOffset.top = limit.bottom;
 						} else {
 								hitY = false;
 						}
@@ -146,11 +139,7 @@ db.physical = {
 						if (hitY) {
 								e.projectile.velocity.y *= -1;
 						}
-						var hit =  hitX || hitY;
-						if (hit) {
-								e.$element.offset(e.offset);
-						}
-						return hit
+						return hitX || hitY;
 				}
 
 				/*When an item has passed into abother reset it to it's last position
@@ -158,8 +147,7 @@ db.physical = {
 				*we're totally cheating :)
 				*/
 				var tame = function(e1, e2) {
-								e1.offset = e1.lastOffset;
-								e1.$element.offset(e1.offset);
+								e1.nextOffset = e1.offset;
 				}
 
 				var onDragInit = function(e) {
@@ -246,8 +234,8 @@ db.physical = {
 
 				this.intersects = function(e1, e2) {
 
-						var o1 = e1.offset;
-						var o2 = e2.offset;
+						var o1 = e1.nextOffset;
+						var o2 = e2.nextOffset;
 
 						var x1 = o1.left, y1 = o1.top,
 						w1 = e1.element.offsetWidth, h1 = e1.element.offsetHeight,
@@ -385,7 +373,7 @@ db.physical.Collider.WrappedElement = function(element, params){
 		this.element = element;
 		this.$element = jQuery(element);
 		this.offset = this.$element.offset();
-		this.lastOffset = this.offset;
+		this.nextOffset = this.offset;
 		this.projectile = this.$element.data("physical");
 		if(!this.projectile) {
 				this.projectile = new db.physical.Collider.Projectile(this.$element, params);
@@ -408,9 +396,17 @@ db.physical.Collider.WrappedElement.prototype = {
 				this.$element.offset(this.offset);
 		},
 		saveOffset : function() {
-				this.lastOffset = {
+				this.nextOffset = {
 						top : this.offset.top,
 						left : this.offset.left
+				}
+		},
+		updatePosition : function() {
+				if ((this.offset.top != this.nextOffset.top) ||
+						(this.offset.left != this.nextOffset.left)) {
+
+						this.$element.offset(this.nextOffset);
+						this.offset = this.nextOffset;
 				}
 		}
 };
