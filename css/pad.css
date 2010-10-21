@@ -1,0 +1,52 @@
+#items {
+		width: 1000px;
+		height: 600px;
+		border: 1px solid black;
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		position: relative;
+}
+
+.node {
+		margin: 0;
+		padding: 0;
+		position: absolute;
+		width: 50px;
+}
+
+.item {
+		width: 50px;
+		height: 50px;
+		background-color: blue;
+		font-size: x-large;
+		color: white;
+}
+
+.active {
+		border: 3px dashed red;
+}
+
+.group {
+		border: 1px solid black;
+		width: 70px;
+		height: 70px;
+		margin: 0;
+		padding: 0;
+		list-style-type: none;
+}
+
+.group.expanded {
+		width: 300px;
+		overflow: auto;
+}
+
+.group li {
+		position: absolute;
+}
+
+.group.expanded li {
+		position: static;
+		float: left;
+		margin: 5px;
+}
