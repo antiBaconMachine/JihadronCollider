@@ -13,7 +13,8 @@ db.physical = {
 						friction : 0.03,
 						minSpeed : 0.2,
 						maxSpeed : 100,
-						glideCancelTimeout : 100
+						glideCancelTimeout : 100,
+						randomMass : true
 				}
 				params = jQuery.extend({},defaults,params);
 
@@ -74,11 +75,11 @@ db.physical = {
 										y : p1.velocity.y
 								}
 
-								p1.velocity.x = elasticCollision(p1.velocity.x, p2.velocity.x, p1.mass, p2.mass);
-								p1.velocity.y = elasticCollision(p1.velocity.y, p2.velocity.y, p1.mass, p2.mass);
+										p1.velocity.x = elasticCollision(p1.velocity.x, p2.velocity.x, p1.mass, p2.mass);
+										p1.velocity.y = elasticCollision(p1.velocity.y, p2.velocity.y, p1.mass, p2.mass);
 
-								p2.velocity.x = elasticCollision(p2.velocity.x, v1.x, p1.mass, p2.mass);
-								p2.velocity.y = elasticCollision(p2.velocity.y, v1.y, p1.mass, p2.mass);
+										p2.velocity.x = elasticCollision(p2.velocity.x, v1.x, p1.mass, p2.mass);
+										p2.velocity.y = elasticCollision(p2.velocity.y, v1.y, p1.mass, p2.mass);
 
 						}
 				}
@@ -310,7 +311,10 @@ db.physical.Collider.Projectile = function(element, params, velocity) {
 				db.log(db.LogLevel.DEBUG, "velocity is %i %i",this.velocity.x, this.velocity.y);
 		};
 		this.setMass = function(mass) {
-				this.mass = mass //+ (Math.random()-0.5)/2;
+				if (params.randomMass){
+						mass += (Math.random()-0.5)/2;
+				}
+				this.mass = mass;
 		};
 		this.isMoving = function() {
 				return Math.abs(this.velocity.x) > params.minSpeed
