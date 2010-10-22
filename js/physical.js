@@ -25,6 +25,25 @@ db.physical = {
 				var cache = new db.physical.Collider.ElementCache(params);
 				var runTimes = [];
 
+				/**
+					* Grid object reduces the ammount of collision tests we need to do by only
+					* tracking objects the current item is likely to hit.
+					*
+					* The grid has to be iterated once per iteration which involves an operation
+					* on each item. These setup costs are repayed by the hugely reduced collision
+					* tests.
+					*
+					* Two grids are initated a lower and an upper. The upper grid is offset
+					* exactly half the size of the lower so that the intersection of four grid
+					* squares occurs in the exact centre of a lower grid square.
+					*
+					* When building a list of items to test the items location will be determined
+					* by the lower grid. Objects it might collide with are determined by the intersecting
+					* 4 squares in the upper grid. In this way we ensure that items very close to or on a
+					* square border will have sufficient margin. To do this on a single grid the contents of 9 squares
+					* (origin and all adjacent) would have to be checked. With two grids we need only
+					* check 4.
+					*/
 				var CollisionGrid = function() {
 						if (!container.length) {
 								var $container = jQuery(container);
@@ -87,9 +106,12 @@ db.physical = {
 								}
 						}
 
+						/**
+							*Resets and populates the upper grid with items and sets a new origin (lower) square
+							*reference on each item
+							*/
 						this.populateGrid = function(items) {
 								reset(upperGrid);
-								reset(lowerGrid);
 								var size = params.squareSize;
 								items.each(function(i,e) {
 										e = cache.get(e);
@@ -98,10 +120,9 @@ db.physical = {
 										var uRow = Math.floor((e.offset.top - upperGrid.offset) / size);
 										var uCol = Math.floor((e.offset.left - upperGrid.offset) / size);
 
-										var lGridRef = lowerGrid[lRow][lCol];
-										lGridRef.items.push(e);
-										e.gridRef = lGridRef;
-
+										//store ref to lower grid in element
+										e.gridRef = lowerGrid[lRow][lCol];
+										//store ref to element in upper grid
 										upperGrid[uRow][uCol].items.push(e);
 								});
 						}
@@ -109,7 +130,8 @@ db.physical = {
 						this.getItemsForTest = function(gridRef) {
 								var items = [];
 								var squares = [];
-								squares.push(gridRef);
+
+								//test the 4 upper grid squares which intersect with the origin square
 								squares.push(upperGrid[gridRef.row][gridRef.col]);
 								squares.push(upperGrid[gridRef.row + 1][gridRef.col]);
 								squares.push(upperGrid[gridRef.row][gridRef.col + 1]);
