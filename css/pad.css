@@ -1,6 +1,6 @@
 #items {
-		width: 1000px;
-		height: 600px;
+		width: 1000px !important;
+		height: 600px !important;
 		border: 1px solid black;
 		list-style-type: none;
 		margin: 0;
