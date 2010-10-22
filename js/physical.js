@@ -375,6 +375,7 @@ db.physical = {
 	}
 	interval = setInterval(run, params.stepSpeed);
    }
+   jQuery("#fps").html("");
   };
 
   this.stop = function() {
@@ -389,7 +390,9 @@ db.physical = {
 	av += runTimes[i];
    });
    av = av/len;
-   db.log(db.LogLevel.INFO, "Collider has stopped, average pass time: %i (%ifps)",av,Math.round(1000/av));
+   var fps = Math.round(1000/av);
+   db.log(db.LogLevel.INFO, "Collider has stopped, average pass time: %i (%ifps)",av,fps);
+   jQuery("#fps").html("<h1>~"+fps+"fps</h1>");
 
   };
 
