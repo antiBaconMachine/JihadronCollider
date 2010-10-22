@@ -7,39 +7,9 @@
 				<script src="js/dragPad.js"></script>
 				<script src="js/physical.js"></script>
 				<script type="text/javascript">
-						var collider;
-						jQuery(function() {
-								
-								/*collider.getProjectile(jQuery("#A"),{speed : 10});
-								collider.getProjectile(jQuery("#B"),{speed : -5});
-								collider.start();*/
 
-								collider = new db.physical.Collider("#items");
-								var pad= new db.dragPad.Pad({
-										container : "#items",
-										hooks : {
-												bind		: collider.bindHandlers,
-												unbind : collider.unbindHandlers,
-												group : collider.calcMass,
-												ungroup : collider.calcMass
-										}
-								});
-								
-								//Random run
-								if (false) {
-										jQuery("#items").children().each(function(i,e) {
-												var e = collider.getElement(e);
-												var p = e.projectile;
-												p.velocity.x = Math.floor(Math.random() * 25) - Math.floor(Math.random()*25);
-												p.velocity.y = Math.floor(Math.random() * 25) - Math.floor(Math.random()*25);
-												jQuery("#stuff")[0].innerHTML+="velocities["+i+"]={x:"+p.velocity.x+",y:"+p.velocity.y+"};<br/>";
-												collider.start();
-										})
-								}
-
-								//Constant run
-								if (true) {
-										var velocities = [];
+						var test = function() {
+								var velocities = [];
 										velocities[0]={x:17,y:15};
 										velocities[1]={x:-4,y:1};
 										velocities[2]={x:7,y:-13};
@@ -73,7 +43,43 @@
 												p.velocity = velocities[i];
 												collider.start();
 										})
+						}
+
+						var collider;
+						jQuery(function() {
+								
+								/*collider.getProjectile(jQuery("#A"),{speed : 10});
+								collider.getProjectile(jQuery("#B"),{speed : -5});
+								collider.start();*/
+
+								collider = new db.physical.Collider("#items");
+								var pad= new db.dragPad.Pad({
+										container : "#items",
+										hooks : {
+												bind		: collider.bindHandlers,
+												unbind : collider.unbindHandlers,
+												group : collider.calcMass,
+												ungroup : collider.calcMass
+										}
+								});
+								
+								//Random run
+								if (false) {
+										jQuery("#items").children().each(function(i,e) {
+												var e = collider.getElement(e);
+												var p = e.projectile;
+												p.velocity.x = Math.floor(Math.random() * 25) - Math.floor(Math.random()*25);
+												p.velocity.y = Math.floor(Math.random() * 25) - Math.floor(Math.random()*25);
+												jQuery("#stuff")[0].innerHTML+="velocities["+i+"]={x:"+p.velocity.x+",y:"+p.velocity.y+"};<br/>";
+												collider.start();
+										})
 								}
+
+								//Constant run
+								if (true) {
+										test();
+								}
+
 						})
 						
 				</script>
