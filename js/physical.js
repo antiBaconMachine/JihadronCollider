@@ -15,7 +15,8 @@ db.physical = {
 						maxSpeed : 100,
 						glideCancelTimeout : 100,
 						randomMass : false,
-						squareSize : 150
+						squareSize : 150,
+						circularCollisions : true
 				}
 				params = jQuery.extend({},defaults,params);
 
@@ -181,8 +182,12 @@ db.physical = {
 														//db.log(db.LogLevel.DEBUG, "Testing %s against %s", e1.id, e2.id);
 														if (self.intersects(e1,e2)) {
 																//db.log(db.LogLevel.DEBUG, "%o intersects %o", e1,e2);
+																if (params.circularCollisions) {
+																		circularCollision(e1,e2);
+																} else {
+																		elasticCollision(e1,e2);
+																}
 																tame(e1,e2);
-																react(e1,e2);
 														}
 												}
 												tested[e2.element.id]=true;
@@ -197,7 +202,7 @@ db.physical = {
 				};
 
 				//Actual velocity swapping happens here
-				var react = function(e1, e2) {
+				var elasticCollision = function(e1, e2) {
 						if (e2) {
 								var p1 = e1.projectile;
 								var p2 = e2.projectile;
@@ -206,20 +211,49 @@ db.physical = {
 										y : p1.velocity.y
 								}
 
-								p1.velocity.x = elasticCollision(p1.velocity.x, p2.velocity.x, p1.mass, p2.mass);
-								p1.velocity.y = elasticCollision(p1.velocity.y, p2.velocity.y, p1.mass, p2.mass);
+								p1.velocity.x = doElasticCollision(p1.velocity.x, p2.velocity.x, p1.mass, p2.mass);
+								p1.velocity.y = doElasticCollision(p1.velocity.y, p2.velocity.y, p1.mass, p2.mass);
 
-								p2.velocity.x = elasticCollision(p2.velocity.x, v1.x, p1.mass, p2.mass);
-								p2.velocity.y = elasticCollision(p2.velocity.y, v1.y, p1.mass, p2.mass);
+								p2.velocity.x = doElasticCollision(p2.velocity.x, v1.x, p1.mass, p2.mass);
+								p2.velocity.y = doElasticCollision(p2.velocity.y, v1.y, p1.mass, p2.mass);
 
 						}
 				}
-			
-				var elasticCollision = function(u1, u2, m1, m2) {
+				var doElasticCollision = function(u1, u2, m1, m2) {
 						return (u1*(m1-m2) + (2*m2*u2))  / (m1+m2);
 				}
 
+				var circularCollision = function(e1, e2) {
+						var nX1 = e1.nextOffset.left;
+						var nY1= e1.nextOffset.top;
+						var nDistX = e2.nextOffset.left - nX1;
+						var nDistY = e2.nextOffset.top - nY1;
 
+						var nDistance = Math.sqrt ( nDistX * nDistX + nDistY * nDistY );
+						var nRadiusA = e1.element.nextOffsetWidth/2;
+						var nRadiusB = e2.element.nextOffsetWidth/2;
+						//var nRadius:Number = 10;
+
+						var nNormalX = nDistX/nDistance;
+						var nNormalY= nDistY/nDistance;
+
+						var nMidpointX = ( nX1 + e2.nextOffset.left )/2;
+						var nMidpointY= ( nY1 + e2.nextOffset.top )/2;
+
+					/*	e1.nextOffset.left = nMidpointX - nNormalX * nRadiusA;
+						e1.nextOffset.top = nMidpointY - nNormalY * nRadiusA;
+						e2.nextOffset.left = nMidpointX + nNormalX * nRadiusB;
+						e2.nextOffset.top = nMidpointY + nNormalY * nRadiusB;*/
+
+						var nVector = ( ( e1.projectile.velocity.x - e2.projectile.velocity.x ) * nNormalX )+ ( ( e1.projectile.velocity.y - e2.projectile.velocity.y ) * nNormalY );
+						var nVelX = nVector * nNormalX;
+						var nVelY= nVector * nNormalY;
+
+						e1.projectile.velocity.x -= nVelX;
+						e1.projectile.velocity.y -= nVelY;
+						e2.projectile.velocity.x += nVelX;
+						e2.projectile.velocity.y += nVelY;
+				}
 
 				var move = function(e) {
 						var proj = e.projectile;
@@ -235,9 +269,7 @@ db.physical = {
 						pos.left = pos.left + chooseX(proj.velocity.x, params.maxSpeed);
 						pos.top = pos.top + chooseY(proj.velocity.y, params.maxSpeed);
 
-				//db.log(db.LogLevel.DEBUG, "position of %o is %o",e,coords);
-
-				//e.$element.offset(pos);
+						//db.log(db.LogLevel.DEBUG, "position of %o is %o",e,coords);
 				}
 
 				//essentially a run on from move
@@ -275,9 +307,9 @@ db.physical = {
 				}
 
 				/*When an item has passed into abother reset it to it's last position
-				*hopefully this will happen fast enough that the user won;t notice
-				*we're totally cheating :)
-				*/
+					*hopefully this will happen fast enough that the user won't notice
+					*we're totally cheating :)
+					*/
 				var tame = function(e1, e2) {
 						e1.nextOffset = e1.offset;
 				}
@@ -424,7 +456,7 @@ db.physical.Collider.Projectile = function(element, params, velocity) {
 		};
 		this.isMoving = function() {
 				return Math.abs(this.velocity.x) > params.minSpeed
-				&& Math.abs(this.velocity.y) > params.minSpeed
+						&& Math.abs(this.velocity.y) > params.minSpeed
 		};
 		this.averageSpeed = function(history) {
 				var samples = history.length-1;
@@ -517,5 +549,8 @@ db.physical.Collider.WrappedElement.prototype = {
 						this.$element.offset(this.nextOffset);
 						this.offset = this.nextOffset;
 				}
+		},
+		getTheta : function() {
+				return Math.atan((this.nextOffset.left - this.offset.left) / (this.nextOffset.top - this.nextOffset.top));
 		}
 };
