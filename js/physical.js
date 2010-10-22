@@ -136,7 +136,6 @@ db.physical = {
 				var run = function() {
 						var startTime = new Date();
 						var items = jQuery("#items").children();
-						var log = new db.physical.TestLog();
 						grid.populateGrid(items);
 						isVolatile = false;
 
@@ -151,20 +150,20 @@ db.physical = {
 										e1.projectile.applyFriction();
 
 										var candidates = grid.getItemsForTest(e1.gridRef);
+										var tested = []
 										for (var j=candidates.length-1; j >= 0; j--) {
 
 												var e2 = candidates[j];
-												if (!e1.equals(e2)) {
-														//	if (!log.tested(e1,e2)) {
-														//log.add(e1,e2);
+												//TODO ensure elements actually have an id
+												if (!tested[e2.element.id] && !e1.equals(e2)) {
 														//db.log(db.LogLevel.DEBUG, "Testing %s against %s", e1.id, e2.id);
 														if (self.intersects(e1,e2)) {
 																//db.log(db.LogLevel.DEBUG, "%o intersects %o", e1,e2);
 																tame(e1,e2);
 																react(e1,e2);
 														}
-												//}
 												}
+												tested[e2.element.id]=true;
 										}
 								}
 								e1.updatePosition();
@@ -360,33 +359,7 @@ db.physical = {
 						}
 				};
 
-		},
-
-		TestLog : function() {
-				var tested= [];
-				return {
-						add : function(e1,e2) {
-								if (!e1.id) e1.id = db.util.generateID("node");
-								if (!e2.id) e2.id = db.util.generateID("node");
-
-								if (!tested[e1.id]) {
-										tested[e1.id] = [];
-								}
-								tested[e1.id][e2.id]=true;
-						},
-						tested : function(e1,e2) {
-								if 
-								(tested[e1.id] && tested[e1.id][e2.id])  {
-										return true;
-								}
-								return false;
-						},
-						clear : function() {
-								tested=[];
-						}
-				}
 		}
-
 }
 
 db.physical.Collider.Projectile = function(element, params, velocity) {
