@@ -133,10 +133,14 @@ db.physical = {
 								var squares = [];
 
 								//test the 4 upper grid squares which intersect with the origin square
+								try {
 								squares.push(upperGrid[gridRef.row][gridRef.col]);
 								squares.push(upperGrid[gridRef.row + 1][gridRef.col]);
 								squares.push(upperGrid[gridRef.row][gridRef.col + 1]);
 								squares.push(upperGrid[gridRef.row + 1][gridRef.col + 1]);
+								}catch (e) {
+									db.log(db.logLevel.ERROR, "Grid ref undefined %o",e);
+								}
 
 								for (var i=squares.length-1; i >= 0; i--) {
 										items = items.concat(squares[i].items);
@@ -376,6 +380,7 @@ db.physical = {
 								}
 								interval = setInterval(run, params.stepSpeed);
 						}
+						jQuery("#fps").html("");
 				};
 
 				this.stop = function() {
@@ -390,7 +395,9 @@ db.physical = {
 								av += runTimes[i];
 						});
 						av = av/len;
+						var fps = Math.round(1000/av);
 						db.log(db.LogLevel.INFO, "Collider has stopped, average pass time: %i (%ifps)",av,Math.round(1000/av));
+						jQuery("#fps").html("<h1>~"+fps+"fps</h1>");
 
 				};
 

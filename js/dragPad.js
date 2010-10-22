@@ -91,7 +91,7 @@ db.dragPad = (function(){
 						.drag("start", onDragStart)
 						.drag(onDrag)
 						.drag("end", onDragEnd)
-						.drop("start", function( ev, dd) {
+						/*.drop("start", function( ev, dd) {
 								if (dd.drag == this) {
 										//Don't drop onto self
 										return false;
@@ -109,7 +109,7 @@ db.dragPad = (function(){
 										return;
 								}
 								db.dragPad.group(dd.dragItem, target);
-						})
+						})*/
 						.data("ddBound",true);
 
 						hooks.doHooks("bind", {item : item});
