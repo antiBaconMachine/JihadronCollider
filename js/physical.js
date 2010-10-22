@@ -14,7 +14,8 @@ db.physical = {
 						minSpeed : 0.2,
 						maxSpeed : 100,
 						glideCancelTimeout : 100,
-						randomMass : false
+						randomMass : false,
+						squareSize : 150
 				}
 				params = jQuery.extend({},defaults,params);
 
@@ -23,11 +24,120 @@ db.physical = {
 
 				var cache = new db.physical.Collider.ElementCache(params);
 				var runTimes = [];
+
+				var CollisionGrid = function() {
+						if (!container.length) {
+								var $container = jQuery(container);
+						} else {
+								var $container = container;
+								container = container[0];
+						}
+
+						var dims = $container.offset();
+						dims = jQuery.extend(dims,{
+								height : container.offsetHeight,
+								width : container.offsetWidth
+						});
+
+						var buildGrid = function(id, offset) {
+								offset = offset || {
+										x:0,
+										y:0
+								};
+								var grid = []
+
+								var currentHeight = offset.y;
+								var i = 0;
+								while (currentHeight < dims.height) {
+										var row = [];
+										var j = 0;
+										var currentWidth = offset.x;
+										while (currentWidth < dims.width) {
+
+												row.push({
+														grid : id,
+														row : i,
+														col : j,
+														dims : {
+																top : currentHeight,
+																left : currentWidth,
+																size : params.squareSize
+														},
+														items : []
+												})
+
+												currentWidth += params.squareSize;
+												j++;
+										}
+										grid[i]=row;
+										currentHeight += params.squareSize;
+										i++;
+								}
+								return grid;
+						}
+
+						var reset = function(grid) {
+								var rLen = grid.length;
+								for (var i = 0 ; i < rLen; i++) {
+										var cols = grid[i];
+										var cLen = cols.length;
+										for (var j = 0; j < cLen; j++) {
+												cols[j].items = [];
+										}
+								}
+						}
+
+						this.populateGrid = function(items) {
+								reset(upperGrid);
+								reset(lowerGrid);
+								var size = params.squareSize;
+								items.each(function(i,e) {
+										e = cache.get(e);
+										var lRow = Math.floor(e.offset.top / size);
+										var lCol = Math.floor(e.offset.left / size);
+										var uRow = Math.floor((e.offset.top - upperGrid.offset) / size);
+										var uCol = Math.floor((e.offset.left - upperGrid.offset) / size);
+
+										var lGridRef = lowerGrid[lRow][lCol];
+										lGridRef.items.push(e);
+										e.gridRef = lGridRef;
+
+										upperGrid[uRow][uCol].items.push(e);
+								});
+						}
+
+						this.getItemsForTest = function(gridRef) {
+								var items = [];
+								var squares = [];
+								squares.push(gridRef);
+								squares.push(upperGrid[gridRef.row][gridRef.col]);
+								squares.push(upperGrid[gridRef.row + 1][gridRef.col]);
+								squares.push(upperGrid[gridRef.row][gridRef.col + 1]);
+								squares.push(upperGrid[gridRef.row + 1][gridRef.col + 1]);
+
+								for (var i=squares.length-1; i >= 0; i--) {
+										items = items.concat(squares[i].items);
+								}
+								return items;
+						}
+
+						var lowerGrid = buildGrid("lower");
+						var o = (params.squareSize/2)*-1;
+						var upperGrid = buildGrid("upper", {
+								x : o,
+								y : o
+						});
+						upperGrid.offset = o;
+
+				}
+
+				var grid = new CollisionGrid(container);
 				
 				var run = function() {
 						var startTime = new Date();
 						var items = jQuery("#items").children();
 						var log = new db.physical.TestLog();
+						grid.populateGrid(items);
 						isVolatile = false;
 
 						var len = items.length;
@@ -40,20 +150,20 @@ db.physical = {
 										hitWall(e1);
 										e1.projectile.applyFriction();
 
-										for (var j=0; j < len; j++) {
-												var e2 = cache.get(items.get(j));
-												if (e1.equals(e2)) {
-												//return;
-												} else {
-														if (!log.tested(e1,e2)) {
-																//log.add(e1,e2);
-																//db.log(db.LogLevel.DEBUG, "Testing %s against %s", e1.id, e2.id);
-																if (self.intersects(e1,e2)) {
-																		//db.log(db.LogLevel.DEBUG, "%o intersects %o", e1,e2);
-																		tame(e1,e2);
-																		react(e1,e2);
-																}
+										var candidates = grid.getItemsForTest(e1.gridRef);
+										for (var j=candidates.length-1; j >= 0; j--) {
+
+												var e2 = candidates[j];
+												if (!e1.equals(e2)) {
+														//	if (!log.tested(e1,e2)) {
+														//log.add(e1,e2);
+														//db.log(db.LogLevel.DEBUG, "Testing %s against %s", e1.id, e2.id);
+														if (self.intersects(e1,e2)) {
+																//db.log(db.LogLevel.DEBUG, "%o intersects %o", e1,e2);
+																tame(e1,e2);
+																react(e1,e2);
 														}
+												//}
 												}
 										}
 								}
@@ -65,7 +175,7 @@ db.physical = {
 						}
 				};
 
-					//Actual velocity swapping happens here
+				//Actual velocity swapping happens here
 				var react = function(e1, e2) {
 						if (e2) {
 								var p1 = e1.projectile;
@@ -75,11 +185,11 @@ db.physical = {
 										y : p1.velocity.y
 								}
 
-										p1.velocity.x = elasticCollision(p1.velocity.x, p2.velocity.x, p1.mass, p2.mass);
-										p1.velocity.y = elasticCollision(p1.velocity.y, p2.velocity.y, p1.mass, p2.mass);
+								p1.velocity.x = elasticCollision(p1.velocity.x, p2.velocity.x, p1.mass, p2.mass);
+								p1.velocity.y = elasticCollision(p1.velocity.y, p2.velocity.y, p1.mass, p2.mass);
 
-										p2.velocity.x = elasticCollision(p2.velocity.x, v1.x, p1.mass, p2.mass);
-										p2.velocity.y = elasticCollision(p2.velocity.y, v1.y, p1.mass, p2.mass);
+								p2.velocity.x = elasticCollision(p2.velocity.x, v1.x, p1.mass, p2.mass);
+								p2.velocity.y = elasticCollision(p2.velocity.y, v1.y, p1.mass, p2.mass);
 
 						}
 				}
@@ -104,9 +214,9 @@ db.physical = {
 						pos.left = pos.left + chooseX(proj.velocity.x, params.maxSpeed);
 						pos.top = pos.top + chooseY(proj.velocity.y, params.maxSpeed);
 
-						//db.log(db.LogLevel.DEBUG, "position of %o is %o",e,coords);
+				//db.log(db.LogLevel.DEBUG, "position of %o is %o",e,coords);
 
-						//e.$element.offset(pos);
+				//e.$element.offset(pos);
 				}
 
 				//essentially a run on from move
@@ -148,7 +258,7 @@ db.physical = {
 				*we're totally cheating :)
 				*/
 				var tame = function(e1, e2) {
-								e1.nextOffset = e1.offset;
+						e1.nextOffset = e1.offset;
 				}
 
 				var onDragInit = function(e) {
@@ -171,7 +281,6 @@ db.physical = {
 						dd.wrappedElement.refresh();
 						self.start();
 				};
-
 
 				//****PUBLIC COLLIDER FUNCTIONS*******//
 
@@ -210,7 +319,7 @@ db.physical = {
 						if (!interval) {
 
 								if (db.profile) {
-								    console.profile("running collider");
+										console.profile("running collider");
 								}
 								interval = setInterval(run, params.stepSpeed);
 						}
@@ -220,7 +329,7 @@ db.physical = {
 						clearInterval(interval);
 						interval = null;
 						if (db.profile) {
-				    console.profileEnd();
+								console.profileEnd();
 						}
 						var len = runTimes.length;
 						var av = 0;
@@ -267,7 +376,7 @@ db.physical = {
 						},
 						tested : function(e1,e2) {
 								if 
-										(tested[e1.id] && tested[e1.id][e2.id])  {
+								(tested[e1.id] && tested[e1.id][e2.id])  {
 										return true;
 								}
 								return false;
@@ -302,7 +411,9 @@ db.physical.Collider.Projectile = function(element, params, velocity) {
 				if (history.length > (200 / params.stepSpeed)) {
 						history = history.slice(1);
 				}
-				timeout = setTimeout(function(){history=[]}, params.glideCancelTimeout);
+				timeout = setTimeout(function(){
+						history=[]
+				}, params.glideCancelTimeout);
 		};
 		this.calcVelocity = function() {
 				if (history.length > 1) {
@@ -385,7 +496,7 @@ db.physical.Collider.WrappedElement = function(element, params){
 db.physical.Collider.WrappedElement.prototype = {
 		refresh : function() {
 				this.offset = this.$element.offset();
-				this.lastOffset = this.offset;
+				this.nextOffset = this.offset;
 				return this;
 		},
 		equals : function(w2) {

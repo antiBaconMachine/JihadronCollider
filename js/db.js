@@ -16,8 +16,9 @@ jQuery.extend(db, {
 
 jQuery.extend(db, {
 
-		logLevel	:	db.LogLevel.DEBUG,
-		profile		:	false,
+		logLevel     :   db.LogLevel.DEBUG,
+		
+		profile						:			false,
 
 		log   : function(level, msg) {
 				var args = Array.prototype.slice.call(arguments, 1);
@@ -102,6 +103,10 @@ jQuery.extend(db, {
 				generateID : function(prefix) {
 						prefix = prefix || "id";
 						return prefix + "_" + new Date().getTime() + Math.floor(Math.random()*1000);
+				},
+
+				indexToAlpha : function(i) {
+						return unescape("%" + parseInt(i+29, 16));
 				},
 
 				HookStore : function(hooks, globalArgs) {
