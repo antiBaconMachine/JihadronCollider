@@ -183,7 +183,7 @@ db.physical = {
 	   //db.log(db.LogLevel.DEBUG, "Testing %s against %s", e1.id, e2.id);
 	   if (self.intersects(e1,e2)) {
 		//db.log(db.LogLevel.DEBUG, "%o intersects %o", e1,e2);
-		if (params.circularCollisions) {
+		if (params.circularCollisions == true) { //Could be string boolean is passed via url
 		 circularCollision(e1,e2);
 		} else {
 		 elasticCollision(e1,e2);
