@@ -84,7 +84,7 @@
 	})
    }
 
-   function getUrlVars()
+   function getUrlParams()
    {
 	var vars = {}, hash;
 	var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
@@ -99,8 +99,9 @@
    var collider;
    jQuery(document).ready(function() {
 
+	var params = getUrlParams();
 
-	collider = new db.physical.Collider("#items");
+	collider = new db.physical.Collider("#items", params);
 	var pad= new db.dragPad.Pad({
 	 container : "#items",
 	 hooks : {
@@ -124,7 +125,7 @@
 	}
 
 	//Constant run
-	if (getUrlVars()["test"]) {
+	if (params.test) {
 	 test();
 	}
 

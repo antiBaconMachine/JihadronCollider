@@ -49,7 +49,10 @@ db.dragPad = (function(){
 						}
 						clearTimeout(dd.group.get(0).timeout);
 				}
-				jQuery(dd.proxy).css({
+				if (!dd.$proxy) {
+				 dd.$proxy = jQuery(dd.proxy);
+				}
+				dd.$proxy.css({
 						top: Math.min( dd.limit.bottom, Math.max( dd.limit.top, dd.offsetY ) ),
 						left: Math.min( dd.limit.right, Math.max( dd.limit.left, dd.offsetX ) )
 				});
@@ -66,9 +69,10 @@ db.dragPad = (function(){
 								db.log(db.LogLevel.INFO, "removing %o from %o",dd.dragItem, dd.originGroup);
 								db.dragPad.ungroup(dd.dragItem, dd.originGroup);
 						}
+
 						dd.dragItem.css({
-								top			:	 dd.offsetY,
-								left		:	 dd.offsetX
+						 top: dd.$proxy.css("top"),
+						 left: dd.$proxy.css("left")
 						});
 				}
 
@@ -123,9 +127,9 @@ db.dragPad = (function(){
 				.unbind("draginit", onDragInit)
 				.unbind("dragstart", onDragStart)
 				.unbind("dragend", onDragEnd)
-				.unbind("dropstart")
+				/*.unbind("dropstart")
 				.unbind("dropend")
-				.unbind("drop")
+				.unbind("drop")*/
 				.data("ddBound",false);
 
 				hooks.doHooks("unbind", {item : item});
