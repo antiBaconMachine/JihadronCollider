@@ -16,7 +16,7 @@ jQuery.extend(db, {
 
 jQuery.extend(db, {
 
-		logLevel     :   db.LogLevel.OFF,
+		logLevel     :   db.LogLevel.INFO,
 		
 		profile						:			false,
 

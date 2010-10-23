@@ -27,24 +27,24 @@ db.physical = {
   var runTimes = [];
 
   /**
-					* Grid object reduces the ammount of collision tests we need to do by only
-					* tracking objects the current item is likely to hit.
-					*
-					* The grid has to be iterated once per iteration which involves an operation
-					* on each item. These setup costs are repayed by the hugely reduced collision
-					* tests.
-					*
-					* Two grids are initated a lower and an upper. The upper grid is offset
-					* exactly half the size of the lower so that the intersection of four grid
-					* squares occurs in the exact centre of a lower grid square.
-					*
-					* When building a list of items to test the items location will be determined
-					* by the lower grid. Objects it might collide with are determined by the intersecting
-					* 4 squares in the upper grid. In this way we ensure that items very close to or on a
-					* square border will have sufficient margin. To do this on a single grid the contents of 9 squares
-					* (origin and all adjacent) would have to be checked. With two grids we need only
-					* check 4.
-					*/
+   * Grid object reduces the ammount of collision tests we need to do by only
+   * tracking objects the current item is likely to hit.
+   *
+   * The grid has to be iterated once per iteration which involves an operation
+   * on each item. These setup costs are repayed by the hugely reduced collision
+   * tests.
+   *
+   * Two grids are initated a lower and an upper. The upper grid is offset
+   * exactly half the size of the lower so that the intersection of four grid
+   * squares occurs in the exact centre of a lower grid square.
+   *
+   * When building a list of items to test the items location will be determined
+   * by the lower grid. Objects it might collide with are determined by the intersecting
+   * 4 squares in the upper grid. In this way we ensure that items very close to or on a
+   * square border will have sufficient margin. To do this on a single grid the contents of 9 squares
+   * (origin and all adjacent) would have to be checked. With two grids we need only
+   * check 4.
+   */
   var CollisionGrid = function() {
    if (!container.length) {
    //var $container = jQuery(container);
@@ -57,6 +57,8 @@ db.physical = {
 	height : container.offsetHeight,
 	width : container.offsetWidth
    };
+   
+   db.log(db.LogLevel.INFO, "Countainer dims h: %ipx w: %ipx",dims.height, dims.width);
 
    var buildGrid = function(id, offset) {
 	offset = offset || {
