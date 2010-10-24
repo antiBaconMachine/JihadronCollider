@@ -372,7 +372,7 @@ db.physical = {
   this.start = function() {
    if (!interval) {
 
-	if (db.profile) {
+	if (params.profile) {
 	 console.profile("running collider");
 	}
 	interval = setInterval(run, params.stepSpeed);
@@ -383,7 +383,7 @@ db.physical = {
   this.stop = function() {
    clearInterval(interval);
    interval = null;
-   if (db.profile) {
+   if (params.profile) {
 	console.profileEnd();
    }
    var len = runTimes.length;
