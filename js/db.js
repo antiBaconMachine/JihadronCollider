@@ -16,9 +16,8 @@ jQuery.extend(db, {
 
 jQuery.extend(db, {
 
-		logLevel     :   db.LogLevel.DEBUG,
+		logLevel     :   db.LogLevel.OFF,
 		
-		profile						:			false,
 
 		log   : function(level, msg) {
 				var args = Array.prototype.slice.call(arguments, 1);
