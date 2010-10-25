@@ -361,7 +361,9 @@ db.physical = {
 	var len = item.children().length;
 	if (len) {
 	 //TODO DOM agnostic way of finding the correct element
-	 self.getElement(item.parent()).projectile.setMass(len);
+	 var e = self.getElement(item.parent());
+		e.projectile.setMass(len);
+		e.projectile.velocity = {x:0,y:0};
 	}
    }
   };
