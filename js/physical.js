@@ -15,7 +15,7 @@ db.physical = {
 						maxSpeed : 100,
 						glideCancelTimeout : 100,
 						randomMass : false,
-						squareSize : 150,
+						squareSize : 125,
 						circularCollisions : true,
 						recordData : true
 				}
