@@ -16,7 +16,7 @@ jQuery.extend(db, {
 
 jQuery.extend(db, {
 
-		logLevel     :   db.LogLevel.OFF,
+		logLevel     :   db.LogLevel.INFO,
 		
 
 		log   : function(level, msg) {
@@ -106,6 +106,15 @@ jQuery.extend(db, {
 
 				indexToAlpha : function(i) {
 						return unescape("%" + parseInt(i+29, 16));
+				},
+
+				average : function(arr) {
+						var len = arr.length;
+						var acc = 0;
+						for (var i = 0; i < len; i++) {
+								acc += arr[i];
+						}
+						return acc / len;
 				},
 
 				HookStore : function(hooks, globalArgs) {
