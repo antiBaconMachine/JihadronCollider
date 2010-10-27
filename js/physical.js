@@ -325,22 +325,25 @@ db.physical = {
 						e1.nextOffset = e1.offset;
 				}
 
-				var onDragInit = function(e) {
-						return function(ev, dd) {
-								dd.wrappedElement = self.getElement(e.get(0));
+				var onDragInit = function(item) {
+						return function(ev, ui) {
+								var dd = ui.helper.data("dd");
+								dd.wrappedElement = self.getElement(item.get(0));
 								dd.wrappedElement.projectile.velocity = {
 										x:0,
 										y:0
 								};
 						};
 				};
-				var onDrag = function(ev, dd) {
+				var onDrag = function(ev, ui) {
+						var dd = ui.helper.data("dd");
 						dd.wrappedElement.projectile.update({
-								x : dd.offsetX,
-								y : dd.offsetY
+								x : ui.offset.left,
+								y : ui.offset.top
 						});
 				};
-				var onDragEnd = function(ev, dd) {
+				var onDragEnd = function(ev, ui) {
+						var dd = ui.helper.data("dd");
 						dd.wrappedElement.projectile.calcVelocity();
 						dd.wrappedElement.refresh();
 						self.start();
@@ -352,15 +355,16 @@ db.physical = {
 						var initHandler = onDragInit(args.item)
 						args.item.data("physicalDragInit",initHandler);
 						args.item
-						.drag("init", onDragInit(args.item))
-						.drag(onDrag)
-						.drag("end", onDragEnd)
+						.bind("dragstart", initHandler)
+						.bind("drag", onDrag)
+						.bind("dragstop", onDragEnd);
+
 				};
 				this.unbindHandlers = function(args) {
-						args.item
+						/*args.item
 						.unbind("dragInit", args.item.data("physicalDragInit"))
 						.unbind("drag", onDrag)
-						.unbind("dragEnd", onDragEnd);
+						.unbind("dragEnd", onDragEnd);*/
 				}
 
 				this.getElement = cache.get;

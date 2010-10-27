@@ -11,33 +11,37 @@ db.dragPad = (function(){
 		var container;
 
 		var onDragInit = function( ev, dd) {
+				
+		};
+		var onDragStart = function( ev, ui ){
+				var dd = {};
 				dragBlocker.block();
 				dd.dragItem = jQuery(this);
 				dd.group = dd.dragItem.children(".group");
 				dd.isGroup = dd.group.length > 0;
-				dd.dragItem.css("z-index", self.params.draggingLevel);
+				//dd.dragItem.css("z-index", self.params.draggingLevel);
 				db.log(db.LogLevel.DEBUG, "drag init on %o %o",dd.dragItem,dd);
-		};
-		var onDragStart = function( ev, dd ){
 				var group = dd.dragItem.closest("ul.group");
 				if (group.length) {
 						dd.originGroup = group;
 						db.log(db.LogLevel.DEBUG, "Dragging %o from a group", dd.dragItem);
 				}
 
-				dd.limit = container.offset();
+				/*dd.limit = container.offset();
 				dd.limit.bottom = dd.limit.top + container.outerHeight() - dd.dragItem.outerHeight();
-				dd.limit.right = dd.limit.left + container.outerWidth() - dd.dragItem.outerWidth();
+				dd.limit.right = dd.limit.left + container.outerWidth() - dd.dragItem.outerWidth();*/
 
-				dd.drop.length ? dd.dragItem.addClass("over") : dd.dragItem.removeClass("over");
+				//dd.drop.length ? dd.dragItem.addClass("over") : dd.dragItem.removeClass("over");
 				//db.log(db.LogLevel.DEBUG, "drag start on %o %o",dd.dragItem,dd);
 				dd.dragItem.css("visibility","hidden");
-				return dd.dragItem.clone()
+				/*return dd.dragItem.clone()
 				.css("visibility","visible")
 				.addClass("proxy")
-				.appendTo( container )
+				.appendTo( container )*/
+				ui.helper.data("dd",dd);
 		};
-		var onDrag = function( ev, dd ){
+		var onDrag = function( ev, ui ){
+				var dd = ui.helper.data("dd");
 				if (!dd.dragNotified) {
 						db.log(db.LogLevel.DEBUG, "drag on %o %o",dd.dragItem,dd);
 						dd.dragNotified=true;
@@ -49,37 +53,38 @@ db.dragPad = (function(){
 						}
 						clearTimeout(dd.group.get(0).timeout);
 				}
-				if (!dd.$proxy) {
+				/*if (!dd.$proxy) {
 				 dd.$proxy = jQuery(dd.proxy);
 				}
 				dd.$proxy.css({
 						top: Math.min( dd.limit.bottom, Math.max( dd.limit.top, dd.offsetY ) ),
 						left: Math.min( dd.limit.right, Math.max( dd.limit.left, dd.offsetX ) )
-				});
+				});*/
 		};
-		var onDragEnd = function( ev, dd) {
+		var onDragEnd = function( ev, ui) {
+				var dd = ui.helper.data("dd");
 				if (dd.droppedItem) {
 						var group = dd.droppedItem.children(".group");
 						if (group.length && group.children().length === 0) {
 								dd.droppedItem.remove();
 						}
 				} else {
-						db.log(db.LogLevel.INFO, "%o was dropped on the container", dd.drag.id);
+						db.log(db.LogLevel.INFO, "%o was dropped on the container", ui.helper.id);
 						if (dd.originGroup) {
 								db.log(db.LogLevel.INFO, "removing %o from %o",dd.dragItem, dd.originGroup);
 								db.dragPad.ungroup(dd.dragItem, dd.originGroup);
 						}
 
 						dd.dragItem.css({
-						 top: dd.$proxy.css("top"),
-						 left: dd.$proxy.css("left")
+						 top: ui.helper.css("top"),
+						 left: ui.helper.css("left")
 						});
 				}
 
 				dd.dragItem.css({
 						visibility : "inherit"
 				});
-				jQuery( dd.proxy ).remove();
+				//jQuery( dd.proxy ).remove();
 				dragBlocker.release();
 		};
 
@@ -91,11 +96,16 @@ db.dragPad = (function(){
 				item = jQuery(item);
 				if (!item.data("ddBound")){
 						item
-						.drag("init", onDragInit)
-						.drag("start", onDragStart)
-						.drag(onDrag)
-						.drag("end", onDragEnd)
-						.drop("start", function( ev, dd) {
+								.draggable({
+										helper : "clone",
+										containment : "parent"
+								})
+								.bind("dragstart", onDragStart)
+								.bind("drag", onDrag)
+								.bind("dragstop", onDragEnd)
+								.data("ddBound",true);
+
+								/*.drop("start", function( ev, dd) {
 								if (dd.drag == this) {
 										//Don't drop onto self
 										return false;
@@ -113,8 +123,7 @@ db.dragPad = (function(){
 										return;
 								}
 								db.dragPad.group(dd.dragItem, target);
-						})
-						.data("ddBound",true);
+						})*/
 
 						hooks.doHooks("bind", {item : item});
 				}
