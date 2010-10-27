@@ -88,6 +88,28 @@ db.dragPad = (function(){
 				dragBlocker.release();
 		};
 
+		var onDropStart = function(ev, ui) {
+					var dd = ui.helper.data("dd");
+				if (dd.drag == this) {
+										//Don't drop onto self
+										return false;
+								}
+								jQuery(this).addClass("active");
+		};
+		var onDropEnd = function(ev, ui) {
+					var dd = ui.helper.data("dd");
+				jQuery(this).removeClass("active");
+		};
+		var onDrop = function(ev, ui) {
+					var dd = ui.helper.data("dd");
+				db.log(db.LogLevel.INFO, "%o was dropped on %o %o", dd.drag.id, this.id, dd);
+				dd.droppedItem = dd.dragItem;
+				var target = jQuery(this);
+				if (target.find(".group").equals(dd.originGroup)) {
+						return;
+				}
+				db.dragPad.group(dd.dragItem, target);
+		};
 
 		var bindDragDropEvents = function(item) {
 				if (!container) {
@@ -96,6 +118,10 @@ db.dragPad = (function(){
 				item = jQuery(item);
 				if (!item.data("ddBound")){
 						item
+								.droppable()
+								.bind("dropover", onDropStart)
+								.bind("droput", onDropEnd)
+								.bind("drop", onDropStart)
 								.draggable({
 										helper : "clone",
 										containment : "parent"
@@ -104,26 +130,6 @@ db.dragPad = (function(){
 								.bind("drag", onDrag)
 								.bind("dragstop", onDragEnd)
 								.data("ddBound",true);
-
-								/*.drop("start", function( ev, dd) {
-								if (dd.drag == this) {
-										//Don't drop onto self
-										return false;
-								}
-								jQuery(this).addClass("active");
-						})
-						.drop("end", function( ev, dd) {
-								jQuery(this).removeClass("active");
-						})
-						.drop(function( ev, dd) {
-								db.log(db.LogLevel.INFO, "%o was dropped on %o %o", dd.drag.id, this.id, dd);
-								dd.droppedItem = dd.dragItem;
-								var target = jQuery(this);
-								if (target.find(".group").equals(dd.originGroup)) {
-										return;
-								}
-								db.dragPad.group(dd.dragItem, target);
-						})*/
 
 						hooks.doHooks("bind", {item : item});
 				}
@@ -136,8 +142,8 @@ db.dragPad = (function(){
 				.unbind("draginit", onDragInit)
 				.unbind("dragstart", onDragStart)
 				.unbind("dragend", onDragEnd)
-				.unbind("dropstart")
-				.unbind("dropend")
+				.unbind("dropover")
+				.unbind("dropout")
 				.unbind("drop")
 				.data("ddBound",false);
 
