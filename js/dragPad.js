@@ -10,10 +10,8 @@ db.dragPad = (function(){
 		var hooks = new db.util.HookStore(["bind","unbind","group","ungroup"]);
 		var container;
 
-		var onDragInit = function( ev, dd) {
-				
-		};
 		var onDragStart = function( ev, ui ){
+				ev.stopPropagation();
 				var dd = {};
 				dragBlocker.block();
 				dd.dragItem = jQuery(this);
@@ -26,21 +24,11 @@ db.dragPad = (function(){
 						dd.originGroup = group;
 						db.log(db.LogLevel.DEBUG, "Dragging %o from a group", dd.dragItem);
 				}
-
-				/*dd.limit = container.offset();
-				dd.limit.bottom = dd.limit.top + container.outerHeight() - dd.dragItem.outerHeight();
-				dd.limit.right = dd.limit.left + container.outerWidth() - dd.dragItem.outerWidth();*/
-
-				//dd.drop.length ? dd.dragItem.addClass("over") : dd.dragItem.removeClass("over");
-				//db.log(db.LogLevel.DEBUG, "drag start on %o %o",dd.dragItem,dd);
-				dd.dragItem.css("visibility","hidden");
-				/*return dd.dragItem.clone()
-				.css("visibility","visible")
-				.addClass("proxy")
-				.appendTo( container )*/
-				ui.helper.data("dd",dd);
+			dd.dragItem.css("visibility","hidden");
+			ui.helper.data("dd",dd);
 		};
 		var onDrag = function( ev, ui ){
+				ev.stopPropagation();
 				var dd = ui.helper.data("dd");
 				if (!dd.dragNotified) {
 						db.log(db.LogLevel.DEBUG, "drag on %o %o",dd.dragItem,dd);
@@ -53,15 +41,9 @@ db.dragPad = (function(){
 						}
 						clearTimeout(dd.group.get(0).timeout);
 				}
-				/*if (!dd.$proxy) {
-				 dd.$proxy = jQuery(dd.proxy);
-				}
-				dd.$proxy.css({
-						top: Math.min( dd.limit.bottom, Math.max( dd.limit.top, dd.offsetY ) ),
-						left: Math.min( dd.limit.right, Math.max( dd.limit.left, dd.offsetX ) )
-				});*/
 		};
 		var onDragEnd = function( ev, ui) {
+				ev.stopPropagation();
 				var dd = ui.helper.data("dd");
 				if (dd.droppedItem) {
 						var group = dd.droppedItem.children(".group");
@@ -89,18 +71,22 @@ db.dragPad = (function(){
 		};
 
 		var onDropStart = function(ev, ui) {
+				ev.stopPropagation();
 					var dd = ui.helper.data("dd");
 				if (dd.drag == this) {
 										//Don't drop onto self
 										return false;
 								}
 								jQuery(this).addClass("active");
+
 		};
 		var onDropEnd = function(ev, ui) {
+				ev.stopPropagation();
 					var dd = ui.helper.data("dd");
 					jQuery(this).removeClass("active");
 		};
 		var onDrop = function(ev, ui) {
+				ev.stopPropagation();
 					var dd = ui.helper.data("dd");
 				jQuery(this).removeClass("active");
 				db.log(db.LogLevel.INFO, "%o was dropped on %o %o", ui.draggable.id, this.id, dd);
@@ -111,6 +97,16 @@ db.dragPad = (function(){
 				}
 				db.dragPad.group(dd.dragItem, target);
 		};
+
+	 var getDragHelper = function(item) {
+				var id = item[0].id + "_helper";
+				return function() {
+						return item.clone()
+								.appendTo(container)
+								.attr("id",id)
+								.get(0);
+				}
+		}
 
 		var bindDragDropEvents = function(item) {
 				if (!container) {
@@ -124,7 +120,7 @@ db.dragPad = (function(){
 								.bind("dropout", onDropEnd)
 								.bind("drop", onDrop)
 								.draggable({
-										helper : "clone",
+										helper : getDragHelper(item),
 										containment : "parent"
 								})
 								.bind("dragstart", onDragStart)
@@ -133,23 +129,20 @@ db.dragPad = (function(){
 								.data("ddBound",true);
 
 						hooks.doHooks("bind", {item : item});
+				} else {
+						item
+						.draggable("enable")
+						.droppable("enable");
 				}
 		};
 
 		var unbindDragDropEvents = function(item) {
 				item = jQuery(item);
+				if (item.data("ddBound")) {
 				item
-				.unbind("drag", onDrag)
-				.unbind("draginit", onDragInit)
-				.unbind("dragstart", onDragStart)
-				.unbind("dragend", onDragEnd)
-				.unbind("dropover")
-				.unbind("dropout")
-				.unbind("drop")
-				.removeClass("active")
-				.data("ddBound",false);
-
-				hooks.doHooks("unbind", {item : item});
+						.draggable("disable")
+						.droppable("disable");
+				}
 		};
 
 		var moveNode = function(nodes, target, positionRef) {
@@ -187,10 +180,11 @@ db.dragPad = (function(){
 				expand : function(event) {
 						//db.log(db.LogLevel.INFO, "expanding pile %o %o",event.data.pile, self);
 						dragBlocker.doIfNotBlocked(function(){
-								var pile = event.data.pile;
+								var data = event.data;
+								var pile = data.pile;
 								pile.get(0).timeout = setTimeout(function(){
-										jQuery(event.data.pile).addClass("expanded");
-
+										jQuery(pile).addClass("expanded");
+										unbindDragDropEvents(data.target);
 										event.data.pile.children().each(function(i,e){
 												bindDragDropEvents(e);
 										});
@@ -202,11 +196,14 @@ db.dragPad = (function(){
 				collapse : function(event) {
 						//db.log(db.LogLevel.INFO, "collapsing pile %o %o", event.data.pile, event.data.pile.timeout);
 						dragBlocker.doWhenNotBlocked(function(){
-								clearTimeout(event.data.pile.get(0).timeout);
-								event.data.pile.children().each(function(i,e){
+								var data = event.data;
+								var pile = data.pile;
+								clearTimeout(pile.get(0).timeout);
+								pile.children().each(function(i,e){
 										unbindDragDropEvents(e);
 								});
-								jQuery(event.data.pile).removeClass("expanded");
+								pile.removeClass("expanded");
+								unbindDragDropEvents(data.target);
 						});
 				},
 
@@ -219,14 +216,14 @@ db.dragPad = (function(){
 								.wrap(jQuery("<li class='node'>"))
 
 								pile = target.children("ul");
+								var data =  {
+										pile : pile,
+										target : target
+								};
 
 								pile
-								.bind("mouseenter", {
-										pile : pile
-								}, db.dragPad.expand)
-								.bind("mouseleave", {
-										pile : pile
-								}, db.dragPad.collapse)
+								.bind("mouseenter", data, db.dragPad.expand)
+								.bind("mouseleave", data, db.dragPad.collapse);
 						}
 						
 						var group = dropped.children(".group");
@@ -234,9 +231,10 @@ db.dragPad = (function(){
 						moveNode(items, pile);
 
 						var j = 5;
-						var items = pile.children();
+						items = pile.children();
 						for (var i = items.length; i>0; i--) {
 								var item = jQuery(items[i-1]);
+								unbindDragDropEvents(item);
 								if (j > 0) {
 										item.css("top", (j*3)+"px");
 										item.css("left", (j*3)+"px");

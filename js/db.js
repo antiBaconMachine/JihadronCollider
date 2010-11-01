@@ -240,6 +240,7 @@ jQuery.extend(db, {
 								if (timeout) {
 										setTimeout(this.release, timeout);
 								}
+								db.log(db.LogLevel.INFO, "BLOCKED");
 						},
 						isBlocked : function() {
 								return blocked;
@@ -250,6 +251,7 @@ jQuery.extend(db, {
 										e.fn.call(e.ctx);
 								});
 								queue = [];
+								db.log(db.LogLevel.INFO, "RELEASED");
 						},
 						doIfNotBlocked : function(fn, ctx) {
 								ctx = ctx || window;

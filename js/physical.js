@@ -361,10 +361,10 @@ db.physical = {
 
 				};
 				this.unbindHandlers = function(args) {
-						/*args.item
-						.unbind("dragInit", args.item.data("physicalDragInit"))
+						args.item
+						.unbind("dragstart", args.item.data("physicalDragInit"))
 						.unbind("drag", onDrag)
-						.unbind("dragEnd", onDragEnd);*/
+						.unbind("dragstop", onDragEnd);
 				}
 
 				this.getElement = cache.get;
