@@ -98,11 +98,12 @@ db.dragPad = (function(){
 		};
 		var onDropEnd = function(ev, ui) {
 					var dd = ui.helper.data("dd");
-				jQuery(this).removeClass("active");
+					jQuery(this).removeClass("active");
 		};
 		var onDrop = function(ev, ui) {
 					var dd = ui.helper.data("dd");
-				db.log(db.LogLevel.INFO, "%o was dropped on %o %o", dd.drag.id, this.id, dd);
+				jQuery(this).removeClass("active");
+				db.log(db.LogLevel.INFO, "%o was dropped on %o %o", ui.draggable.id, this.id, dd);
 				dd.droppedItem = dd.dragItem;
 				var target = jQuery(this);
 				if (target.find(".group").equals(dd.originGroup)) {
@@ -120,8 +121,8 @@ db.dragPad = (function(){
 						item
 								.droppable()
 								.bind("dropover", onDropStart)
-								.bind("droput", onDropEnd)
-								.bind("drop", onDropStart)
+								.bind("dropout", onDropEnd)
+								.bind("drop", onDrop)
 								.draggable({
 										helper : "clone",
 										containment : "parent"
@@ -145,6 +146,7 @@ db.dragPad = (function(){
 				.unbind("dropover")
 				.unbind("dropout")
 				.unbind("drop")
+				.removeClass("active")
 				.data("ddBound",false);
 
 				hooks.doHooks("unbind", {item : item});
