@@ -17,7 +17,7 @@ db.physical = {
 						randomMass : false,
 						squareSize : 125,
 						circularCollisions : true,
-						recordData : true
+						recordData : true,
 				}
 				params = jQuery.extend({},defaults,params);
 

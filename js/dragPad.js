@@ -2,7 +2,8 @@ db.dragPad = (function(){
 
 		var defaults = {
 				draggingLevel	:	1000,
-				groupExpandDelay		:	500
+				groupExpandDelay		:	500,
+				draggable : "li"
 		};
 
 		var self;
@@ -176,7 +177,7 @@ db.dragPad = (function(){
 						if (params.hooks) hooks.addHooks(params.hooks);
 						
 						container = jQuery(params.container);
-						container.children("li").each(function(i,e){
+						container.find(params.draggable).each(function(i,e){
 								bindDragDropEvents(e, true, true);
 						});
 				},
