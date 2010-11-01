@@ -7,7 +7,7 @@ db.dragPad = (function(){
 
 		var self;
 		var dragBlocker = new db.Blocker();
-		var hooks = new db.util.HookStore(["bind","unbind","group","ungroup"]);
+		var hooks = new db.util.HookStore(["bind","group","ungroup"]);
 		var container;
 
 		var onDragStart = function( ev, ui ){

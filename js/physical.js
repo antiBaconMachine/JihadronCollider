@@ -360,13 +360,7 @@ db.physical = {
 						.bind("dragstop", onDragEnd);
 
 				};
-				this.unbindHandlers = function(args) {
-						args.item
-						.unbind("dragstart", args.item.data("physicalDragInit"))
-						.unbind("drag", onDrag)
-						.unbind("dragstop", onDragEnd);
-				}
-
+			
 				this.getElement = cache.get;
 
 				this.calcMass = function(args) {
