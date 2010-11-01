@@ -17,7 +17,7 @@ db.physical = {
 						randomMass : false,
 						squareSize : 125,
 						circularCollisions : true,
-						recordData : true
+						recordData : true,
 				}
 				params = jQuery.extend({},defaults,params);
 
@@ -35,17 +35,17 @@ db.physical = {
    * Grid object reduces the ammount of collision tests we need to do by only
    * tracking objects the current item is likely to hit.
    *
-   * The grid has to be iterated once per iteration which involves an operation
+   * The grid has to be iterated once per frame which involves an operation
    * on each item. These setup costs are repayed by the hugely reduced collision
    * tests.
    *
-   * Two grids are initated a lower and an upper. The upper grid is offset
+   * Two grids are initated: a lower and an upper. The upper grid is offset
    * exactly half the size of the lower so that the intersection of four grid
    * squares occurs in the exact centre of a lower grid square.
    *
-   * When building a list of items to test the items location will be determined
+   * When building a list of items to test, the item's location will be determined
    * by the lower grid. Objects it might collide with are determined by the intersecting
-   * 4 squares in the upper grid. In this way we ensure that items very close to or on a
+   * 4 squares in the upper grid. In this way we ensure that items very close to, or on a
    * square border will have sufficient margin. To do this on a single grid the contents of 9 squares
    * (origin and all adjacent) would have to be checked. With two grids we need only
    * check 4.
@@ -325,22 +325,28 @@ db.physical = {
 						e1.nextOffset = e1.offset;
 				}
 
-				var onDragInit = function(e) {
-						return function(ev, dd) {
-								dd.wrappedElement = self.getElement(e.get(0));
+				var onDragInit = function(item) {
+						return function(ev, ui) {
+								ev.stopPropagation();
+								var dd = ui.helper.data("dd");
+								dd.wrappedElement = self.getElement(item.get(0));
 								dd.wrappedElement.projectile.velocity = {
 										x:0,
 										y:0
 								};
 						};
 				};
-				var onDrag = function(ev, dd) {
+				var onDrag = function(ev, ui) {
+						ev.stopPropagation();
+						var dd = ui.helper.data("dd");
 						dd.wrappedElement.projectile.update({
-								x : dd.offsetX,
-								y : dd.offsetY
+								x : ui.offset.left,
+								y : ui.offset.top
 						});
 				};
-				var onDragEnd = function(ev, dd) {
+				var onDragEnd = function(ev, ui) {
+						ev.stopPropagation();
+						var dd = ui.helper.data("dd");
 						dd.wrappedElement.projectile.calcVelocity();
 						dd.wrappedElement.refresh();
 						self.start();
@@ -352,17 +358,12 @@ db.physical = {
 						var initHandler = onDragInit(args.item)
 						args.item.data("physicalDragInit",initHandler);
 						args.item
-						.drag("init", onDragInit(args.item))
-						.drag(onDrag)
-						.drag("end", onDragEnd)
-				};
-				this.unbindHandlers = function(args) {
-						args.item
-						.unbind("dragInit", args.item.data("physicalDragInit"))
-						.unbind("drag", onDrag)
-						.unbind("dragEnd", onDragEnd);
-				}
+						.bind("dragstart", initHandler)
+						.bind("drag", onDrag)
+						.bind("dragstop", onDragEnd);
 
+				};
+			
 				this.getElement = cache.get;
 
 				this.calcMass = function(args) {

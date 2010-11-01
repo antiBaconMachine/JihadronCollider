@@ -42,8 +42,8 @@
 
 				<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
 				<script src="js/db.js"></script>
-				<script src="js/drag.js"></script>
-				<script src="js/drop.js"></script>
+			 <script src="js/jquery-ui-1.7.3.custom.min.js"></script>
+				<script type="text/javascript" src="js/HookStore.js"></script>
 				<script src="js/dragPad.js"></script>
 				<script src="js/physical.js"></script>
 				<script type="text/javascript">
@@ -95,7 +95,6 @@
 										container : "#items",
 										hooks : {
 												bind		: collider.bindHandlers,
-												unbind : collider.unbindHandlers,
 												group : collider.calcMass,
 												ungroup : collider.calcMass
 										}
