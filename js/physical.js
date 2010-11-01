@@ -327,6 +327,7 @@ db.physical = {
 
 				var onDragInit = function(item) {
 						return function(ev, ui) {
+								ev.stopPropagation();
 								var dd = ui.helper.data("dd");
 								dd.wrappedElement = self.getElement(item.get(0));
 								dd.wrappedElement.projectile.velocity = {
@@ -336,6 +337,7 @@ db.physical = {
 						};
 				};
 				var onDrag = function(ev, ui) {
+						ev.stopPropagation();
 						var dd = ui.helper.data("dd");
 						dd.wrappedElement.projectile.update({
 								x : ui.offset.left,
@@ -343,6 +345,7 @@ db.physical = {
 						});
 				};
 				var onDragEnd = function(ev, ui) {
+						ev.stopPropagation();
 						var dd = ui.helper.data("dd");
 						dd.wrappedElement.projectile.calcVelocity();
 						dd.wrappedElement.refresh();
