@@ -119,157 +119,21 @@ jQuery.extend(db, {
 
 				getUrlParams : function() {
 						var vars = {}, hash;
-								var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-								for(var i = hashes.length-1; i >= 0; i--)
-								{
-										hash = hashes[i].split('=');
+						var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+						for(var i = hashes.length-1; i >= 0; i--)
+						{
+								hash = hashes[i].split('=');
 
-										var val = hash[1];
-										var intVal = parseInt(val);
-									 if (!isNaN(intVal)) {
-												val = intVal;
-										}else if (val==="true" || val==="false") {
-												val = Boolean(val);
-										}
-										vars[hash[0]] = val;
+								var val = hash[1];
+								var intVal = parseInt(val);
+								if (!isNaN(intVal)) {
+										val = intVal;
+								}else if (val==="true" || val==="false") {
+										val = Boolean(val);
 								}
-								return vars;
-				},
-
-				HookStore : function(hooks, globalArgs) {
-
-						globalArgs = globalArgs || {};
-
-						//The only reason this function exists is to keep the object extension out of the loop
-						var startLoop = function(arr, scopedArgs) {
-								scopedArgs = scopedArgs || {};
-								return looper(arr, jQuery.extend({}, globalArgs, scopedArgs));
-						};
-						//recursive function to iterate the hooks in priority order
-						var looper = function(arr, args) {
-								if (arr.length) {
-										var element = arr[0];
-										if (typeof element === "object") {
-												//Element is an array so walk it
-												return continueProcessing(looper(element, args), arr, args);
-										} else if (typeof element === "function") {
-												//Element is a function so call it
-												return continueProcessing(element.call(this, args), arr, args);
-										} else {
-												//Element is unusable (probably an undefined priority)
-												return continueProcessing(true, arr, args);
-										}
-								} else {
-										//array is empty
-										return true;
-								}
+								vars[hash[0]] = val;
 						}
-						//Encapsulates the continuation logic which is called from more than one location in looper
-						var continueProcessing = function(boo, arr, args) {
-								if (boo) {
-										//function indicated we should continue processing the hook chain
-										return looper(arr.slice(1), args);
-								} else {
-										//function indicated no further hooks should be processed
-										return false;
-								}
-						}
-
-						var hookStore = {};
-						if (hooks) {
-								jQuery(hooks).each(function(i, e) {
-										hookStore[e] =[];
-								});
-						}
-
-						return {
-
-								PRIORITY : {
-										HIGHEST :   0,
-										HIGH    :   2,
-										MEDIUM  :   4,
-										LOW     :   6,
-										LOWEST  :   8
-								},
-
-								addHooks : function(hookMap, priority) {
-										for (var key in hookMap) {
-												this.addHook(key, hookMap[key], priority);
-										}
-								},
-								
-								addHook :   function(event, fn, priority) {
-										if (!priority) {
-												priority = this.PRIORITY.LOW;
-										}
-										var eventContainer = hookStore[event];
-										if (!eventContainer) {
-												db.log(db.LogLevel.WARN, "Hook container %s is undefined, creating",event);
-												hookStore[event] = [];
-												eventContainer = hookStore[event];
-										}
-										var container = eventContainer[priority];
-										if (!container) {
-												eventContainer[priority] = [];
-												container = eventContainer[priority];
-										}
-										container.push(fn);
-								},
-
-								doHooks :   function(event, args) {
-										var priorities = hookStore[event] || [];
-										return startLoop(priorities, args);
-								},
-
-								setArgs :   function(args){
-										args = args || {};
-										jQuery.extend(globalArgs, args);
-								}
-
-						}
-				}
-		},
-
-		Blocker : function() {
-				var queue = [];
-				var blocked = false;
-
-				return {
-						block : function(timeout) {
-								blocked = true;
-								if (timeout) {
-										setTimeout(this.release, timeout);
-								}
-								db.log(db.LogLevel.INFO, "BLOCKED");
-						},
-						isBlocked : function() {
-								return blocked;
-						},
-						release : function() {
-								blocked = false;
-								jQuery(queue).each(function(i,e) {
-										e.fn.call(e.ctx);
-								});
-								queue = [];
-								db.log(db.LogLevel.INFO, "RELEASED");
-						},
-						doIfNotBlocked : function(fn, ctx) {
-								ctx = ctx || window;
-								if (!blocked) {
-										fn.call(ctx);
-										return true;
-								}
-								return false;
-						},
-						doWhenNotBlocked : function(fn, ctx) {
-								ctx = ctx || window;
-								if (!this.doIfNotBlocked(fn, ctx)) {
-										queue.push({
-												fn : fn,
-												ctx : ctx
-										});
-								}
-						}
+						return vars;
 				}
 		}
 });

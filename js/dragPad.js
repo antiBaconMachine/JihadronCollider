@@ -6,8 +6,8 @@ db.dragPad = (function(){
 		};
 
 		var self;
-		var dragBlocker = new db.Blocker();
-		var hooks = new db.util.HookStore(["bind","group","ungroup"]);
+		var hooks = new db.HookStore(["bind","group","ungroup"]);
+		var dragBlocker = hooks.getBlocker("dragBlocker");
 		var container;
 
 		var onDragStart = function( ev, ui ){
@@ -51,7 +51,7 @@ db.dragPad = (function(){
 								dd.droppedItem.remove();
 						}
 				} else {
-						db.log(db.LogLevel.INFO, "%o was dropped on the container", ui.helper.id);
+						db.log(db.LogLevel.DEBUG, "%o was dropped on the container", dd.dragItem[0].id);
 						if (dd.originGroup) {
 								db.log(db.LogLevel.INFO, "removing %o from %o",dd.dragItem, dd.originGroup);
 								db.dragPad.ungroup(dd.dragItem, dd.originGroup);
@@ -118,11 +118,14 @@ db.dragPad = (function(){
 				item = jQuery(item);
 				if (!item.data("ddBound")){
 						item
-								.droppable()
+								.droppable({
+										addClasses : false
+								})
 								.bind("dropover", onDropStart)
 								.bind("dropout", onDropEnd)
 								.bind("drop", onDrop)
 								.draggable({
+										addClasses : false,
 										helper : getDragHelper(item),
 										containment : "parent"
 								})
@@ -212,9 +215,11 @@ db.dragPad = (function(){
 				group	:	function(dropped, target) {
 						var pile = target.children("ul");
 						if (!pile.length) {
+								var id = target.attr("id");
+								target.attr("id","");
 								target.addClass("pile")
 								.children().wrapAll(jQuery("<ul class='group'></ul>"))
-								.wrap(jQuery("<li class='node'>"))
+								.wrap(jQuery("<li class='node' id='" + id + "'>"));
 
 								pile = target.children("ul");
 								var data =  {
