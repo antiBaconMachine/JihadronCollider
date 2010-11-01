@@ -218,8 +218,6 @@ db.dragPad = (function(){
   group	:	function(dropped, target) {
    var pile = target.children("ul");
    if (!pile.length) {
-	var id = target.attr("id");
-	target.attr("id","");
 //	target.addClass("pile")
 //	.children().wrapAll(jQuery("<ul class='group'></ul>"))
 //	.wrap(jQuery("<li class='node' id='" + id + "'>"));
@@ -236,7 +234,7 @@ db.dragPad = (function(){
 	 bindDragDropEvents(group, true, true);
 
 
-	pile = target.closest("ul.group");
+	pile = target.parent();
 	var data =  {
 	 pile : pile,
 	 target : target
@@ -248,7 +246,7 @@ db.dragPad = (function(){
    }
 						
    var group = dropped.children(".group");
-   var items = group.length ? group.children("li") : dropped;
+   var items = group.length ? group.children(params.draggable) : dropped;
    moveNode(items, pile);
 
    var j = 5;
