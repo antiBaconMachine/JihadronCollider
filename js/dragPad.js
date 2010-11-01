@@ -108,10 +108,13 @@ db.dragPad = (function(){
 				}
 		}
 
-		var bindDragDropEvents = function(item) {
+		var bindDragDropEvents = function(item, drag, drop) {
 				if (!container) {
 						container = jQuery(self.params.container);
 				}
+				if (typeof drag === "undefined") drag = true;
+				if (typeof drop === "undefined") drop = true;
+
 				item = jQuery(item);
 				if (!item.data("ddBound")){
 						item
@@ -129,19 +132,17 @@ db.dragPad = (function(){
 								.data("ddBound",true);
 
 						hooks.doHooks("bind", {item : item});
-				} else {
-						item
-						.draggable("enable")
-						.droppable("enable");
 				}
-		};
-
-		var unbindDragDropEvents = function(item) {
-				item = jQuery(item);
-				if (item.data("ddBound")) {
-				item
-						.draggable("disable")
-						.droppable("disable");
+				
+				if (drag) {
+						item.draggable("enable");
+				}else {
+						item.draggable("disable");
+				}
+				if (drop) {
+						item.droppable("enable");
+				} else {
+						item.droppable("disable");
 				}
 		};
 
@@ -155,7 +156,7 @@ db.dragPad = (function(){
 								top								:	positionRef.css("top"),
 								left							:	positionRef.css("left")
 						});
-						bindDragDropEvents(node);
+						bindDragDropEvents(node, true, true);
 				})
 				
 				return nodes;
@@ -173,7 +174,7 @@ db.dragPad = (function(){
 						
 						container = jQuery(params.container);
 						container.children("li").each(function(i,e){
-								bindDragDropEvents(e);
+								bindDragDropEvents(e, true, true);
 						});
 				},
 
@@ -184,9 +185,9 @@ db.dragPad = (function(){
 								var pile = data.pile;
 								pile.get(0).timeout = setTimeout(function(){
 										jQuery(pile).addClass("expanded");
-										unbindDragDropEvents(data.target);
+										bindDragDropEvents(data.target, false, true);
 										event.data.pile.children().each(function(i,e){
-												bindDragDropEvents(e);
+												bindDragDropEvents(e, true, false);
 										});
 
 								}, self.params.groupExpandDelay);
@@ -200,10 +201,10 @@ db.dragPad = (function(){
 								var pile = data.pile;
 								clearTimeout(pile.get(0).timeout);
 								pile.children().each(function(i,e){
-										unbindDragDropEvents(e);
+										bindDragDropEvents(e, false, false);
 								});
 								pile.removeClass("expanded");
-								unbindDragDropEvents(data.target);
+								bindDragDropEvents(data.target, true, true);
 						});
 				},
 
@@ -234,7 +235,7 @@ db.dragPad = (function(){
 						items = pile.children();
 						for (var i = items.length; i>0; i--) {
 								var item = jQuery(items[i-1]);
-								unbindDragDropEvents(item);
+								bindDragDropEvents(item, false, false);
 								if (j > 0) {
 										item.css("top", (j*3)+"px");
 										item.css("left", (j*3)+"px");
