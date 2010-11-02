@@ -192,7 +192,7 @@ db.dragPad = (function(){
 	pile.get(0).timeout = setTimeout(function(){
 	 jQuery(pile).addClass("expanded");
 	 bindDragDropEvents(data.target, false, true);
-	 event.data.pile.children().each(function(i,e){
+	 event.data.pile.find(self.params.draggable).each(function(i,e){
 	  bindDragDropEvents(e, true, false);
 	 });
 
@@ -206,7 +206,7 @@ db.dragPad = (function(){
 	var data = event.data;
 	var pile = data.pile;
 	clearTimeout(pile.get(0).timeout);
-	pile.children().each(function(i,e){
+	pile.find(self.params.draggable).each(function(i,e){
 	 bindDragDropEvents(e, false, false);
 	});
 	pile.removeClass("expanded");
@@ -237,7 +237,7 @@ db.dragPad = (function(){
 	pile = target.parent();
 	var data =  {
 	 pile : pile,
-	 target : target
+	 target : pile.parent()
 	};
 
 	pile
@@ -246,7 +246,7 @@ db.dragPad = (function(){
    }
 						
    var group = dropped.children(".group");
-   var items = group.length ? group.children(params.draggable) : dropped;
+   var items = group.length ? group.children(self.params.draggable) : dropped;
    moveNode(items, pile);
 
    var j = 5;
