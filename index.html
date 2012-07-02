@@ -1,121 +1,144 @@
+<!DOCTYPE html>
+<!--
+
+Test file for the collision engine
+
+After each collision run the fps and average comparison per frame are shown.
+
+Two useful parameters are 
+
+?test=true which executes a preset pattern  of collisions 
+in a predictable fashion for easy benchmarking
+
+and
+
+random=true which sets off random movement in every object
+
+Also the much more embyonic stacking system:
+
+Items can be grouped together by drag and drop thus forming larger, heavier targets
+and simple organisational units. This is still quite conceptual and nowhere close
+to bugfree
+-->
 <html>
-		<head>
-				<link rel="stylesheet" type="text/css" href="css/pad.css" />
-				<style type="text/css">
+    <head>
+        <link rel="stylesheet" type="text/css" href="css/pad.css" />
+        <style type="text/css">
 
-				</style>
-		</head>
-		<body>
-				<ul id="items" style="width: 1000px; height="600px">
-								<li class="node" id="A"><div class="item photo" >A</div></li>
-						<li class="node" id="B" style="left: 100px"><div class="item file">B</div></li>
-						<li class="node" id="C" style="left: 200px"><div class="item file">C</div></li>
-						<li class="node" id="D" style="left: 300px"><div class="item file">D</div></li>
-						<li class="node" id="E" style="left: 400px"><div class="item file">E</div></li>
-						<li class="node" id="F" style="left: 500px"><div class="item file">F</div></li>
-						<li class="node" id="G" style="left: 600px"><div class="item file">G</div></li>
-						<li class="node" id="H" style="left: 700px"><div class="item file">H</div></li>
-						<li class="node" id="I" style="left: 800px"><div class="item file">I</div></li>
-						<li class="node" id="J" style="left: 100px; top: 100px"><div class="item file">J</div></li>
-						<li class="node" id="K" style="left: 200px; top: 100px"><div class="item file">K</div></li>
-						<li class="node" id="L" style="left: 300px; top: 100px"><div class="item file">L</div></li>
-						<li class="node" id="M" style="left: 400px; top: 100px"><div class="item file">M</div></li>
-						<li class="node" id="N" style="left: 500px; top: 100px"><div class="item file">N</div></li>
-						<li class="node" id="O" style="left: 600px; top: 100px"><div class="item file">O</div></li>
-						<li class="node" id="P" style="left: 700px; top: 100px"><div class="item file">P</div></li>
-						<li class="node" id="Q" style="left: 800px; top: 100px"><div class="item file">Q</div></li>
-						<li class="node" id="R" style="left: 100px; top: 200px"><div class="item file">R</div></li>
-						<li class="node" id="S" style="left: 200px; top: 200px"><div class="item file">S</div></li>
-						<li class="node" id="T" style="left: 300px; top: 200px"><div class="item file">T</div></li>
-						<li class="node" id="U" style="left: 400px; top: 200px"><div class="item file">U</div></li>
-						<li class="node" id="V" style="left: 500px; top: 200px"><div class="item file">V</div></li>
-						<li class="node" id="W" style="left: 600px; top: 200px"><div class="item file">W</div></li>
-						<li class="node" id="X" style="left: 700px; top: 200px"><div class="item file">X</div></li>
-						<li class="node" id="Y" style="left: 800px; top: 200px"><div class="item file">Y</div></li>
-						<li class="node" id="Z" style="left: 900px; top: 200px"><div class="item file">Z</div></li>
-				</ul>
-				<ul id="data" style="position: absolute; right: 20px; top: 0; margin: 0; padding: 0; list-style-type: none">
-						<li id="compares" ></li>
-						<li id="fps"></li>
-				</ul>
+        </style>
+    </head>
+    <body>
+        <ul id="items" style="width: 1000px; height="600px">
+            <li class="node" id="A"><div class="item photo" >A</div></li>
+            <li class="node" id="B" style="left: 100px"><div class="item file">B</div></li>
+            <li class="node" id="C" style="left: 200px"><div class="item file">C</div></li>
+            <li class="node" id="D" style="left: 300px"><div class="item file">D</div></li>
+            <li class="node" id="E" style="left: 400px"><div class="item file">E</div></li>
+            <li class="node" id="F" style="left: 500px"><div class="item file">F</div></li>
+            <li class="node" id="G" style="left: 600px"><div class="item file">G</div></li>
+            <li class="node" id="H" style="left: 700px"><div class="item file">H</div></li>
+            <li class="node" id="I" style="left: 800px"><div class="item file">I</div></li>
+            <li class="node" id="J" style="left: 100px; top: 100px"><div class="item file">J</div></li>
+            <li class="node" id="K" style="left: 200px; top: 100px"><div class="item file">K</div></li>
+            <li class="node" id="L" style="left: 300px; top: 100px"><div class="item file">L</div></li>
+            <li class="node" id="M" style="left: 400px; top: 100px"><div class="item file">M</div></li>
+            <li class="node" id="N" style="left: 500px; top: 100px"><div class="item file">N</div></li>
+            <li class="node" id="O" style="left: 600px; top: 100px"><div class="item file">O</div></li>
+            <li class="node" id="P" style="left: 700px; top: 100px"><div class="item file">P</div></li>
+            <li class="node" id="Q" style="left: 800px; top: 100px"><div class="item file">Q</div></li>
+            <li class="node" id="R" style="left: 100px; top: 200px"><div class="item file">R</div></li>
+            <li class="node" id="S" style="left: 200px; top: 200px"><div class="item file">S</div></li>
+            <li class="node" id="T" style="left: 300px; top: 200px"><div class="item file">T</div></li>
+            <li class="node" id="U" style="left: 400px; top: 200px"><div class="item file">U</div></li>
+            <li class="node" id="V" style="left: 500px; top: 200px"><div class="item file">V</div></li>
+            <li class="node" id="W" style="left: 600px; top: 200px"><div class="item file">W</div></li>
+            <li class="node" id="X" style="left: 700px; top: 200px"><div class="item file">X</div></li>
+            <li class="node" id="Y" style="left: 800px; top: 200px"><div class="item file">Y</div></li>
+            <li class="node" id="Z" style="left: 900px; top: 200px"><div class="item file">Z</div></li>
+        </ul>
+        <ul id="data" style="position: absolute; right: 20px; top: 0; margin: 0; padding: 0; list-style-type: none">
+            <li id="compares" ></li>
+            <li id="fps"></li>
+        </ul>
 
 
-				<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
-				<script src="js/db.js"></script>
-				<script src="js/jquery-ui-1.7.3.custom.min.js"></script>
-				<script type="text/javascript" src="js/HookStore.js"></script>
-				<script src="js/dragPad.js"></script>
-				<script src="js/physical.js"></script>
-				<script type="text/javascript">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
+        <script src="js/abm/log.js"></script>
+        <script src="js/abm/util.js"></script>
+        <script src="js/jquery-ui-1.7.3.custom.min.js"></script>
+        <script type="text/javascript" src="js/abm/HookStore.js"></script>
+        <script src="js/dragPad.js"></script>
+        <script src="js/physical.js"></script>
+        <script type="text/javascript">
 
-						var test = function() {
-								var velocities = [];
-								velocities[0]={x:17,y:15};
-								velocities[1]={x:-4,y:1};
-								velocities[2]={x:7,y:-13};
-								velocities[3]={x:5,y:12};
-								velocities[4]={x:-10,y:-15};
-								velocities[5]={x:-3,y:-12};
-								velocities[6]={x:5,y:6};
-								velocities[7]={x:1,y:-15};
-								velocities[8]={x:-5,y:10};
-								velocities[9]={x:1,y:10};
-								velocities[10]={x:-7,y:18};
-								velocities[11]={x:-2,y:7};
-								velocities[12]={x:15,y:-15};
-								velocities[13]={x:-3,y:-5};
-								velocities[14]={x:-7,y:-10};
-								velocities[15]={x:7,y:-3};
-								velocities[16]={x:9,y:-13};
-								velocities[17]={x:9,y:-12};
-								velocities[18]={x:13,y:21};
-								velocities[19]={x:3,y:-9};
-								velocities[20]={x:9,y:2};
-								velocities[21]={x:-8,y:17};
-								velocities[22]={x:2,y:-1};
-								velocities[23]={x:3,y:-17};
-								velocities[24]={x:5,y:-6};
-								velocities[25]={x:4,y:1};
+            var test = function() {
+                var velocities = [];
+                velocities[0]={x:17,y:15};
+                velocities[1]={x:-4,y:1};
+                velocities[2]={x:7,y:-13};
+                velocities[3]={x:5,y:12};
+                velocities[4]={x:-10,y:-15};
+                velocities[5]={x:-3,y:-12};
+                velocities[6]={x:5,y:6};
+                velocities[7]={x:1,y:-15};
+                velocities[8]={x:-5,y:10};
+                velocities[9]={x:1,y:10};
+                velocities[10]={x:-7,y:18};
+                velocities[11]={x:-2,y:7};
+                velocities[12]={x:15,y:-15};
+                velocities[13]={x:-3,y:-5};
+                velocities[14]={x:-7,y:-10};
+                velocities[15]={x:7,y:-3};
+                velocities[16]={x:9,y:-13};
+                velocities[17]={x:9,y:-12};
+                velocities[18]={x:13,y:21};
+                velocities[19]={x:3,y:-9};
+                velocities[20]={x:9,y:2};
+                velocities[21]={x:-8,y:17};
+                velocities[22]={x:2,y:-1};
+                velocities[23]={x:3,y:-17};
+                velocities[24]={x:5,y:-6};
+                velocities[25]={x:4,y:1};
 
-								jQuery("#items").children().each(function(i,e) {
-										var e = collider.getElement(e);
-										var p = e.projectile;
-										p.velocity = velocities[i];
-										collider.start();
-								})
-						}
+                jQuery("#items").children().each(function(i,e) {
+                    var e = collider.getElement(e);
+                    var p = e.projectile;
+                    p.velocity = velocities[i];
+                    collider.start();
+                })
+            }
 
-						var collider;
-						jQuery(document).ready(function() {
+            var collider;
+            jQuery(document).ready(function() {
 
-								var params = jQuery.extend({r : 25}, db.util.getUrlParams());
+                var params = jQuery.extend({r : 25}, abm.util.getUrlParams());
 
-								collider = new db.physical.Collider("#items", params);
-								var pad= new db.dragPad.Pad({
-										container : "#items",
-										hooks : {
-												bind		: collider.bindHandlers,
-												group : collider.calcMass,
-												ungroup : collider.calcMass
-										}
-								});
+                collider = new abm.physical.Collider("#items", params);
+                var pad= new abm.dragPad.Pad({
+                    container : "#items",
+                    hooks : {
+                        bind : collider.bindHandlers,
+                        group : collider.calcMass,
+                        ungroup : collider.calcMass
+                    }
+                });
 
-								//Random run
-								if (params.random) {
-										jQuery("#items").children().each(function(i,e) {
-												var e = collider.getElement(e);
-												var p = e.projectile;
-												p.velocity.x = Math.floor(Math.random() * params.r) - Math.floor(Math.random()*params.r);
-												p.velocity.y = Math.floor(Math.random() * params.r) - Math.floor(Math.random()*params.r);
-												//jQuery("#stuff")[0].innerHTML+="velocities["+i+"]={x:"+p.velocity.x+",y:"+p.velocity.y+"};<br/>";
-												collider.start();
-										})
-								}else if (params.test) { //constant run
-										test();
-								}
+                //Random run
+                if (params.random) {
+                    jQuery("#items").children().each(function(i,e) {
+                        var e = collider.getElement(e);
+                        var p = e.projectile;
+                        p.velocity.x = Math.floor(Math.random() * params.r) - Math.floor(Math.random()*params.r);
+                        p.velocity.y = Math.floor(Math.random() * params.r) - Math.floor(Math.random()*params.r);
+                        //jQuery("#stuff")[0].innerHTML+="velocities["+i+"]={x:"+p.velocity.x+",y:"+p.velocity.y+"};<br/>";
+                        collider.start();
+                    })
+                }else if (params.test) { //constant run
+                    test();
+                }
 
-						})
-				</script>
+            })
+        </script>
 
-		</body>
+    </body>
 </html>

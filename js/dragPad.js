@@ -1,4 +1,4 @@
-db.dragPad = (function(){
+abm.dragPad = (function(){
 
  var defaults = {
   draggingLevel	:	1000,
@@ -7,7 +7,7 @@ db.dragPad = (function(){
  };
 
  var self;
- var hooks = new db.HookStore(["bind","group","ungroup"]);
+ var hooks = new abm.HookStore(["bind","group","ungroup"]);
  var dragBlocker = hooks.getBlocker("dragBlocker");
  var container;
 
@@ -19,11 +19,11 @@ db.dragPad = (function(){
   dd.group = dd.dragItem.children(".group");
   dd.isGroup = dd.group.length > 0;
   //dd.dragItem.css("z-index", self.params.draggingLevel);
-  db.log(db.LogLevel.DEBUG, "drag init on %o %o",dd.dragItem,dd);
+  abm.log(abm.LogLevel.DEBUG, "drag init on %o %o",dd.dragItem,dd);
   var group = dd.dragItem.closest("ul.group");
   if (group.length) {
    dd.originGroup = group;
-   db.log(db.LogLevel.DEBUG, "Dragging %o from a group", dd.dragItem);
+   abm.log(abm.LogLevel.DEBUG, "Dragging %o from a group", dd.dragItem);
   }
   dd.dragItem.css("visibility","hidden");
   ui.helper.data("dd",dd);
@@ -32,12 +32,12 @@ db.dragPad = (function(){
   ev.stopPropagation();
   var dd = ui.helper.data("dd");
   if (!dd.dragNotified) {
-   db.log(db.LogLevel.DEBUG, "drag on %o %o",dd.dragItem,dd);
+   abm.log(abm.LogLevel.DEBUG, "drag on %o %o",dd.dragItem,dd);
    dd.dragNotified=true;
   }
   if (dd.isGroup) {
    if (dd.group.hasClass("expanded")){
-	db.log(db.LogLevel.DEBUG, "Cancelling drag as item is expanded group");
+	abm.log(abm.LogLevel.DEBUG, "Cancelling drag as item is expanded group");
 	return false;
    }
    clearTimeout(dd.group.get(0).timeout);
@@ -52,10 +52,10 @@ db.dragPad = (function(){
 	dd.droppedItem.remove();
    }
   } else {
-   db.log(db.LogLevel.DEBUG, "%o was dropped on the container", dd.dragItem[0].id);
+   abm.log(abm.LogLevel.DEBUG, "%o was dropped on the container", dd.dragItem[0].id);
    if (dd.originGroup) {
-	db.log(db.LogLevel.INFO, "removing %o from %o",dd.dragItem, dd.originGroup);
-	db.dragPad.ungroup(dd.dragItem, dd.originGroup);
+	abm.log(abm.LogLevel.INFO, "removing %o from %o",dd.dragItem, dd.originGroup);
+	abm.dragPad.ungroup(dd.dragItem, dd.originGroup);
    }
 
    dd.dragItem.css({
@@ -90,13 +90,13 @@ db.dragPad = (function(){
   ev.stopPropagation();
   var dd = ui.helper.data("dd");
   jQuery(this).removeClass("active");
-  db.log(db.LogLevel.INFO, "%o was dropped on %o %o", ui.draggable.id, this.id, dd);
+  abm.log(abm.LogLevel.INFO, "%o was dropped on %o %o", ui.draggable.id, this.id, dd);
   dd.droppedItem = dd.dragItem;
   var target = jQuery(this);
   if (target.find(".group").equals(dd.originGroup)) {
    return;
   }
-  db.dragPad.group(dd.dragItem, target);
+  abm.dragPad.group(dd.dragItem, target);
  };
 
  var getDragHelper = function(item) {
@@ -185,7 +185,7 @@ db.dragPad = (function(){
   },
 
   expand : function(event) {
-   //db.log(db.LogLevel.INFO, "expanding pile %o %o",event.data.pile, self);
+   //abm.log(abm.LogLevel.INFO, "expanding pile %o %o",event.data.pile, self);
    dragBlocker.doIfNotBlocked(function(){
 	var data = event.data;
 	var pile = data.pile;
@@ -201,7 +201,7 @@ db.dragPad = (function(){
   },
 
   collapse : function(event) {
-   //db.log(db.LogLevel.INFO, "collapsing pile %o %o", event.data.pile, event.data.pile.timeout);
+   //abm.log(abm.LogLevel.INFO, "collapsing pile %o %o", event.data.pile, event.data.pile.timeout);
    dragBlocker.doWhenNotBlocked(function(){
 	var data = event.data;
 	var pile = data.pile;
@@ -241,8 +241,8 @@ db.dragPad = (function(){
 	};
 
 	pile
-	.bind("mouseenter", data, db.dragPad.expand)
-	.bind("mouseleave", data, db.dragPad.collapse);
+	.bind("mouseenter", data, abm.dragPad.expand)
+	.bind("mouseleave", data, abm.dragPad.collapse);
    }
 						
    var group = dropped.children(".group");
